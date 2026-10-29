@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="AI Mentor 1.0 - An interactive programming learning assistant for computer science students">
+  <title>AI Mentor 1.0 - Programming Learning Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- Chat Header -->
+    <header class="chat-header">
+      <div class="mentor-profile">
+        <div class="avatar">
+          <span>🤖</span>
+          <span class="status-indicator" title="Online"></span>
+        </div>
+        <div class="mentor-info">
+          <h1 class="mentor-name">AI Mentor</h1>
+          <p class="mentor-status">Your coding & learning guide</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" id="export-chat-btn" class="export-chat-btn" title="Export conversation to text file">
+          <svg class="export-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Export Chat</span>
+        </button>
+        <button type="button" id="clear-chat-btn" class="clear-chat-btn" title="Clear conversation history">
+          <svg class="clear-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Clear Chat</span>
+        </button>
+        <div class="header-badge">AI Mentor 1.0</div>
+      </div>
+    </header>
+
+    <!-- Chat Messages Scroll Area -->
+    <main class="chat-main">
+      <div id="chat-messages" class="chat-messages" role="log" aria-live="polite">
+        <!-- Mentor Greeting -->
+        <div class="message-wrapper mentor">
+          <div class="message-avatar">🤖</div>
+          <div class="message-content">
+            <div class="message-header">
+              <span class="sender-name">AI Mentor</span>
+              <span class="timestamp">Ready</span>
+            </div>
+            <div class="message-bubble">
+              <p>Hi there! 👋 I'm your <strong>AI Mentor</strong>. I'm here to help you learn programming, understand
+                core concepts, debug errors, and review code step-by-step.</p>
+              <p>Feel free to ask me anything, such as:</p>
+              <ul>
+                <li><strong>Concepts:</strong> <em>"What is an agent?"</em> or <em>"Explain recursion simply."</em></li>
+                <li><strong>Debugging:</strong> <em>"Why is this code not working?"</em></li>
+                <li><strong>Learning:</strong> <em>"Give me a hint, don't give me the answer."</em></li>
+                <li><strong>Code Review:</strong> <em>"Explain this code line by line."</em></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Chat Input Section -->
+    <footer class="chat-footer">
+      <form id="chat-form" class="chat-input-form">
+        <input type="text" id="message-input" placeholder="Ask your mentor a question..." autocomplete="off" required />
+        <button type="submit" id="send-btn" aria-label="Send message">
+          <span>Send</span>
+          <svg class="send-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+      <p class="input-hint">Tip: Press <kbd>Enter</kbd> to send. Ask for concepts, code explanations, hints, or
+        debugging help.</p>
+    </footer>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+
+</html>
