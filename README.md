@@ -6,7 +6,11 @@ AI Mentor is a beginner-friendly programming mentor designed to help students un
 
 Powered by **Qwen 2.5:3B running locally through Ollama**, with a **FastAPI backend** and a **vanilla HTML, CSS, and JavaScript frontend**, AI Mentor provides an interactive learning experience without requiring a paid cloud AI API.
 
----
+## 🖥️ Application Preview
+
+![AI Mentor 1.0 Screenshot](screenshots/ai-mentor-home.png)
+
+*AI Mentor 1.0 — Your personal, local AI programming mentor.*
 
 ## 📌 Project Overview
 
