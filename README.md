@@ -1,190 +1,254 @@
-# AI Mentor 1.0
+# 🤖 AI Mentor 1.0
 
-An interactive, patient, and beginner-friendly programming mentor powered by a local Large Language Model (**Qwen 2.5:3B**) running locally via **Ollama**, coupled with a **FastAPI** backend and a responsive vanilla **HTML/CSS/JavaScript** frontend.
+### Your Personal, Local AI Programming Mentor
 
-Built specifically for Computer Science & Engineering (CSE) students to learn programming concepts, understand code line by line, debug errors constructively, and get hints without spoiling answers.
+AI Mentor is a beginner-friendly programming mentor designed to help students understand programming concepts, explore code, debug errors, and learn step by step.
 
----
-
-## 🌟 Key Features
-
-1. **Patient Programming Mentor**: Answers questions directly, uses plain English analogies, calibrates detail level, and avoids overwhelming beginners.
-2. **Pedagogical Support**:
-   - **Hints vs. Answers**: Asks guiding questions and gives gentle hints when requested ("*Give me a hint, don't give me the answer*").
-   - **Structured Debugging**: Explains (1) What is wrong, (2) Why it is wrong, and (3) How to fix it, without unnecessary rewrites.
-   - **Code Explanations**: Breaks down complex snippets into easy-to-understand explanations.
-3. **True Local AI Privacy & Zero Cloud Costs**: Runs 100% locally on your machine using Ollama and the `qwen2.5:3b` model. No API keys, no paid subscriptions, and no data leaves your computer.
-4. **Real-Time NDJSON Streaming**: Streams tokens progressively into the browser UI with an animated streaming cursor.
-5. **Smart Sliding-Window Context**: Retains immediate conversational thread across follow-up queries (e.g., "*Why?*", "*What about this?*", "*Give an example*") while keeping Ollama prompts bounded and fast.
-6. **Full Persistence & Export**:
-   - Saves complete conversation history in browser `localStorage`.
-   - **Clear Chat**: Confirms with the user and restores the initial welcome view.
-   - **Export Chat**: Downloads conversation transcripts as clean, readable `.txt` files.
-7. **Zero-Dependency Markdown & Code Blocks**:
-   - Renders code blocks with syntax tags and a one-click **Copy** button.
-   - Formats lists, bold text, italics, inline code, and headers with strict HTML escaping to prevent XSS.
-8. **Resilient Error Handling**:
-   - Clear diagnostic notices when Ollama is offline (`http://127.0.0.1:11434`).
-   - Clear diagnostic notices when the FastAPI backend is offline (`http://127.0.0.1:8000`).
-   - Graceful recovery and partial text preservation if a stream is interrupted.
+Powered by **Qwen 2.5:3B running locally through Ollama**, with a **FastAPI backend** and a **vanilla HTML, CSS, and JavaScript frontend**, AI Mentor provides an interactive learning experience without requiring a paid cloud AI API.
 
 ---
 
-## 🏗️ Architecture Overview
+## 📌 Project Overview
+
+Learning programming can be challenging, especially when you're just starting out. AI Mentor is designed to make that journey easier by providing an interactive assistant that explains concepts in simple language and helps learners work through programming problems.
+
+Instead of focusing only on producing code, AI Mentor is designed to support understanding through explanations, examples, hints, debugging assistance, and follow-up questions.
+
+## ✨ Features
+
+- **💬 Interactive AI Chat** — Ask programming questions and explore technical concepts.
+- **🧠 Conversation Context** — Ask follow-up questions using recent conversation history.
+- **⚡ Streaming Responses** — See the mentor's response as it is generated.
+- **💻 Code Formatting** — Display code blocks and supported Markdown formatting.
+- **📋 Copy Code** — Copy code directly from supported code blocks.
+- **💾 Conversation Persistence** — Restore saved chat history using browser local storage.
+- **🧹 Clear Chat** — Clear the current conversation after confirmation.
+- **📤 Export Chat** — Export a conversation for later reference.
+- **⏳ Thinking Indicator** — See when the mentor is preparing a response.
+- **🛡️ Error Handling** — Display helpful feedback when the backend or Ollama is unavailable.
+- **🔒 Local AI Inference** — Run the language model locally instead of depending on a paid cloud AI API.
+
+## 🛠️ Technology Stack
+
+| Component | Technology |
+|---|---|
+| Frontend | HTML5, CSS3, JavaScript |
+| Backend | Python, FastAPI |
+| AI Runtime | Ollama |
+| Language Model | Qwen 2.5:3B (`qwen2.5:3b`) |
+| HTTP Communication | Fetch API, HTTP streaming |
+| Conversation Storage | Browser `localStorage` |
+
+## 🏗️ System Architecture
+
+AI Mentor uses a simple client-server architecture.
 
 ```text
-┌────────────────────────────────────────────────────────┐
-│                   Browser Client                       │
-│        (HTML5, Vanilla CSS, Vanilla JavaScript)        │
-└──────────────┬───────────────────────────▲─────────────┘
-               │ HTTP POST /chat           │ NDJSON Stream
-               │ JSON: {message, history}  │ {content, done}
-               ▼                           │
-┌──────────────────────────────────────────┴─────────────┐
-│                 FastAPI Backend Server                 │
-│              Python 3.12 + httpx client                │
-│                                                        │
-│  - System Prompt Persona Management                    │
-│  - Sliding Window Context Buffer (Recent 10 turns)     │
-│  - Token Prediction Limit (1024 tokens)                │
-└──────────────┬───────────────────────────▲─────────────┘
-               │ HTTP POST /api/chat       │ Chunked Stream
-               │ JSON: {model, messages}   │ JSON chunks
-               ▼                           │
-┌──────────────────────────────────────────┴─────────────┐
-│                  Local Ollama Service                  │
-│                http://127.0.0.1:11434                  │
-│                Model: qwen2.5:3b                       │
-└────────────────────────────────────────────────────────┘
+┌──────────────────────────────┐
+│       Web Browser            │
+│                              │
+│   HTML + CSS + JavaScript    │
+└──────────────┬───────────────┘
+               │
+               │ HTTP Request
+               │ Streaming Response
+               ▼
+┌──────────────────────────────┐
+│       FastAPI Backend        │
+│                              │
+│  Request Handling            │
+│  Conversation Context        │
+│  Response Streaming          │
+└──────────────┬───────────────┘
+               │
+               │ Local API
+               ▼
+┌──────────────────────────────┐
+│         Ollama               │
+│                              │
+│       Qwen 2.5:3B             │
+│       Local Inference        │
+└──────────────────────────────┘
 ```
 
-### Protocol & Streaming
-1. Frontend makes an asynchronous `fetch` `POST` request to `http://127.0.0.1:8000/chat`.
-2. Backend receives the request, prepends the `SYSTEM_PROMPT`, extracts the most recent conversation context (sliding window of 10 messages), and forwards the payload to Ollama's `/api/chat`.
-3. Backend receives Ollama's streamed response and yields newline-delimited JSON (**NDJSON**) chunks with `Content-Type: application/x-ndjson`:
-   ```json
-   {"content": "An", "done": false}
-   {"content": " agent", "done": false}
-   {"content": " is...", "done": false}
-   {"content": "", "done": true}
-   ```
-4. Frontend reads the byte stream using `ReadableStream` (`getReader()`), decodes UTF-8 text, and progressively renders Markdown into the message bubble.
+### How It Works
 
----
+1. The user enters a question in the web interface.
+2. JavaScript sends the message and conversation history to the FastAPI backend.
+3. The backend prepares the conversation context and sends a request to Ollama.
+4. Ollama runs the Qwen model locally and generates a response.
+5. The backend streams the response to the frontend.
+6. The frontend displays the response and saves conversation history in browser storage.
 
 ## 📁 Project Structure
 
 ```text
 ai-mentor/
+│
 ├── backend/
-│   ├── main.py              # FastAPI application, streaming endpoint, Ollama client, system prompt
-│   ├── requirements.txt     # Python dependencies (fastapi, uvicorn, httpx)
-│   └── README.md            # Detailed backend documentation
+│   ├── main.py
+│   ├── requirements.txt
+│   └── README.md
+│
 ├── frontend/
-│   ├── index.html           # Accessible chat application layout
-│   ├── style.css            # Dark-mode styling, responsive design, code styling, animations
-│   ├── app.js               # Frontend chat logic, streaming parser, markdown renderer, persistence
-│   └── README.md            # Detailed frontend documentation
-└── README.md                # Project documentation (this file)
+│   ├── index.html
+│   ├── style.css
+│   ├── app.js
+│   └── README.md
+│
+├── .gitignore
+└── README.md
 ```
 
----
-
-## 🚀 Getting Started
+## ⚙️ Installation and Setup
 
 ### Prerequisites
 
-1. **Python 3.10+** (Tested on Python 3.12)
-2. **Ollama** installed on your system ([ollama.com](https://ollama.com))
-3. A modern web browser (Chrome, Firefox, Edge, Safari)
+Install the following software before running the project:
+
+- [Python](https://www.python.org/downloads/)
+- [Ollama](https://ollama.com/download)
+- [Git](https://git-scm.com/downloads) (optional, for cloning the repository)
+
+You will also need sufficient memory and storage to run the selected language model locally.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/karthikr2006/ai-mentor.git
+cd ai-mentor
+```
+
+Alternatively, download the repository as a ZIP file from GitHub and extract it.
+
+### 2. Download the AI Model
+
+Make sure Ollama is installed and running.
+
+Open a terminal and run:
+
+```bash
+ollama pull qwen2.5:3b
+```
+
+Verify that the model is available:
+
+```bash
+ollama list
+```
+
+### 3. Set Up the Backend
+
+Navigate to the backend directory:
+
+```bash
+cd backend
+```
+
+Create a Python virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+Install the dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+### 4. Start the Backend Server
+
+From the `backend` directory, run:
+
+```bash
+uvicorn main:app --reload
+```
+
+The backend should be available at:
+
+- **API:** `http://127.0.0.1:8000`
+- **Interactive API documentation:** `http://127.0.0.1:8000/docs`
+
+Keep this terminal running while using AI Mentor.
+
+### 5. Open the Frontend
+
+Open `frontend/index.html` in your web browser.
+
+Make sure the backend and Ollama are running before sending messages.
+
+> **Note:** This project is configured for local development. The frontend communicates with the backend on your own computer, so opening the page on another device will not automatically connect it to your local backend.
+
+## 🔌 Backend API
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/` | Check backend status |
+| `POST` | `/chat` | Send a message and receive a streamed AI response |
+
+### Health Check
+
+Request:
+
+```http
+GET http://127.0.0.1:8000/
+```
+
+This endpoint returns information about the backend's status and configured model.
+
+### Chat
+
+Send a `POST` request to `/chat` with a message and, optionally, conversation history.
+
+The backend communicates with Ollama and streams the generated response to the frontend.
+
+## 🔒 Privacy and Local Execution
+
+AI Mentor uses Ollama to run its language model locally. It does not require a paid cloud AI API for its core chat functionality.
+
+Conversation history is stored in the browser's local storage to support restoration between visits. Clearing the conversation removes the saved history through the application's Clear Chat functionality.
+
+**Important:** Local model execution does not automatically make every part of an application private or secure. Use the application locally as configured, and review network settings before exposing the backend to other devices or the internet.
+
+## 🎯 Learning Goals
+
+This project provides practical experience with:
+
+- Frontend development using HTML, CSS, and JavaScript
+- Backend API development using FastAPI
+- HTTP requests and streaming responses
+- Integrating a locally hosted language model
+- Managing conversation context
+- Browser storage and client-side state
+- Error handling and debugging
+- Version control using Git and GitHub
+
+## 🚀 Future Improvements
+
+Potential areas for future development include:
+
+- Improved Markdown and code rendering
+- More robust conversation management
+- Additional learning modes for programming practice
+- Better automated testing
+- Enhanced setup and deployment options
+- Support for configurable local models
+
+## 👨‍💻 Author
+
+**Karthik R**
+
+Computer Science and Engineering Student
+
+GitHub: [@karthikr2006](https://github.com/karthikr2006)
 
 ---
 
-### Step 1: Set Up & Start Ollama
-
-1. Open your terminal and pull the `qwen2.5:3b` model:
-   ```bash
-   ollama pull qwen2.5:3b
-   ```
-2. Verify that the model is downloaded:
-   ```bash
-   ollama list
-   ```
-3. Ensure Ollama service is running:
-   ```bash
-   ollama serve
-   ```
-   *(On Windows/macOS, Ollama usually runs in the background automatically in your system tray).*
-
----
-
-### Step 2: Set Up & Start the Backend
-
-1. Navigate to the `backend/` directory:
-   ```bash
-   cd backend
-   ```
-2. Install Python dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Start the FastAPI development server:
-   ```bash
-   uvicorn main.py:app --reload --port 8000
-   ```
-4. Confirm the server is active:
-   - Visit `http://127.0.0.1:8000/` in your browser.
-   - You should see:
-     ```json
-     {
-       "status": "online",
-       "message": "AI Mentor backend is running successfully!",
-       "version": "1.0.0",
-       "model": "qwen2.5:3b"
-     }
-     ```
-
----
-
-### Step 3: Open the Frontend
-
-1. Simply open `frontend/index.html` in any web browser:
-   - Double-click `frontend/index.html` in your file explorer, OR
-   - Serve using any static server:
-     ```bash
-     cd frontend
-     python -m http.server 3000
-     ```
-     and open `http://localhost:3000` in your browser.
-2. Start chatting with your local AI Mentor!
-
----
-
-## 💬 Conversation Memory & Context Strategy
-
-- **Browser Storage**: All user and mentor messages are saved in browser `localStorage` (`aiMentorConversationHistory`). Conversation history persists across page reloads and browser restarts.
-- **Backend Sliding Window**: To keep local inference fast and avoid exceeding the model's optimal context window, the backend selects the **last 10 messages** (sliding window) from the submitted history, prepends the `SYSTEM_PROMPT`, and forwards them to Ollama.
-- **Context Awareness**: The model seamlessly resolves follow-up references such as:
-  - *"Why?"*
-  - *"Explain that code"*
-  - *"Give me an example"*
-  - *"What if I change the second line?"*
-
----
-
-## 🛡️ Error Handling Guide
-
-| Scenario | Behavior & User Feedback |
-| :--- | :--- |
-| **Ollama is offline** | Backend catches `httpx.ConnectError` and returns HTTP 503. Frontend displays: *"Could not connect to Ollama. Please make sure the Ollama application is running on your machine (http://127.0.0.1:11434)."* |
-| **Backend is offline** | Frontend catches fetch error and displays: *"Cannot connect to the AI Mentor backend. Please ensure the FastAPI server is running on http://127.0.0.1:8000."* |
-| **Model not found** | Backend returns HTTP 502 with: *"Model 'qwen2.5:3b' was not found in Ollama. Please run 'ollama pull qwen2.5:3b' in your terminal."* |
-| **Request Timeout** | Backend catches timeout and returns HTTP 504. Frontend displays actionable guidance to check system load. |
-| **Empty Input** | Frontend ignores empty submissions; backend validates `request.message.strip()` and rejects empty queries with HTTP 400. |
-| **Interrupted Stream** | If the stream breaks mid-response, the received text is preserved with a notice `*(⚠️ Response was interrupted)*`, and saved to localStorage without data loss. |
-
----
-
-## 📜 License & Notes
-
-Designed as an educational project for computer science students learning AI engineering, client-server architectures, and streaming protocols.
+*AI Mentor 1.0 — Learn concepts. Understand code. Grow as a programmer.*
