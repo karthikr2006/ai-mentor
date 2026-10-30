@@ -104,6 +104,26 @@ ai-mentor/
 └── README.md
 ```
 
+## 🚀 Quick Start (Windows)
+
+Want to run AI Mentor quickly? Use the included Windows launcher.
+
+### Prerequisites
+- Python installed.
+- Ollama installed and running.
+- The `qwen2.5:3b` model downloaded.
+- Backend dependencies installed.
+
+### Launch the Application
+1. Make sure Ollama is running.
+2. Double-click `start-ai-mentor.bat` in the project folder.
+3. Wait for the backend to start.
+4. The frontend will open automatically in your browser.
+5. Start chatting with your AI Mentor!
+
+**Note:** Keep the backend terminal open while using the application. The launcher is designed for Windows.
+
+---
 ## ⚙️ Installation and Setup
 
 ### Prerequisites
